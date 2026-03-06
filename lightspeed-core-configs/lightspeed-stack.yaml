@@ -23,8 +23,7 @@ service:
   access_log: true
 llama_stack:
   use_as_library_client: false
-  url: http://host.docker.internal:8321 # If running locally by spinning up 2 containers, use this
-  # url: http://localhost:8321 # If running in cluster, use this
+  url: http://localhost:8321
 user_data_collection:
   feedback_enabled: false
   feedback_storage: '/tmp/data/feedback'
