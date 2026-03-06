@@ -38,3 +38,27 @@ jobs:
           run: yarn install --immutable --frozen-lockfile
         - name: Validate YAML files
           run: make validate-yaml
+
+  validate-images:
+      runs-on: ubuntu-latest
+      permissions:
+        contents: read
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+        - name: Install yq
+          run: sudo snap install yq
+        - name: Validate image sync
+          run: bash scripts/validate-images.sh
+
+  validate-compose-config:
+      runs-on: ubuntu-latest
+      permissions:
+        contents: read
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+        - name: Install yq
+          run: sudo snap install yq
+        - name: Validate compose config sync
+          run: bash scripts/validate-compose-config.sh
