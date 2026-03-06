@@ -14,11 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 lightspeed-core:
-  version: 0.4.3
+  llama_version: 0.4.3
   image: quay.io/lightspeed-core/lightspeed-stack:dev-20260226-ca21850
 llama-stack:
-  version: 0.4.3
+  llama_version: 0.4.3
   image: registry.redhat.io/rhoai/odh-llama-stack-core-rhel9:v3.3
 rag-content:
-  version: 0.4.3
+  llama_version: 0.4.3
   image: quay.io/redhat-ai-dev/rag-content:release-1.9-lls-0.4.3
