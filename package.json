@@ -5,8 +5,8 @@
     "prettier": "^3.2.0"
   },
   "scripts": {
-    "format": "prettier --write 'lightspeed-core-configs/**/*.{yaml,yml}' 'llama-stack-configs/**/*.{yaml,yml}'",
-    "verify": "prettier --check 'lightspeed-core-configs/**/*.{yaml,yml}' 'llama-stack-configs/**/*.{yaml,yml}'"
+    "format": "prettier --write 'images.yaml' 'lightspeed-core-configs/**/*.{yaml,yml}' 'llama-stack-configs/**/*.{yaml,yml}'",
+    "verify": "prettier --check 'images.yaml' 'lightspeed-core-configs/**/*.{yaml,yml}' 'llama-stack-configs/**/*.{yaml,yml}'"
   },
   "version": "0.1.0"
 }

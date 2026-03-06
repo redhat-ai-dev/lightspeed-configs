@@ -13,11 +13,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-RAG_CONTENT_IMAGE ?= quay.io/redhat-ai-dev/rag-content:release-1.9-lls-0.4.3
+RAG_CONTENT_IMAGE ?= $(shell grep '^RAG_CONTENT_IMAGE=' env/default-values.env | cut -d= -f2-)
 QUESTION_VALIDATION_TAG ?= 0.1.17
 QUESTION_VALIDATION_URL ?= https://raw.githubusercontent.com/lightspeed-core/lightspeed-providers/refs/tags/$(QUESTION_VALIDATION_TAG)/resources/external_providers/inline/safety/lightspeed_question_validity.yaml
 COMPOSE ?= podman compose
 WITH_OLLAMA ?= true
+
+ENV_FILES := --env-file env/default-values.env
+ifneq ($(wildcard env/values.env),)
+ENV_FILES += --env-file env/values.env
+endif
 
 ifeq ($(WITH_OLLAMA),false)
 LOCAL_COMPOSE_FILES := -f compose/compose.yaml
@@ -42,12 +47,12 @@ get-rag: ## Download a copy of the RAG embedding model and vector database
 	podman rm tmp-rag-container
 
 .PHONY: local-up
-local-up: ## Start local compose services (WITH_OLLAMA=true|false)
-	$(COMPOSE) $(LOCAL_COMPOSE_FILES) up -d
+local-up:
+	$(COMPOSE) $(ENV_FILES) $(LOCAL_COMPOSE_FILES) up -d
 
 .PHONY: local-down
-local-down: ## Stop local compose services
-	$(COMPOSE) $(LOCAL_COMPOSE_FILES) down
+local-down:
+	$(COMPOSE) $(ENV_FILES) $(LOCAL_COMPOSE_FILES) down
 
 .PHONY: help
 help: ## Show this help screen
@@ -80,6 +85,22 @@ validate-prompt-templates: $(VENV)/bin/activate
 .PHONY: update-prompt-templates
 update-prompt-templates: $(VENV)/bin/activate
 	$(call run_sync,update)
+
+.PHONY: sync-images
+sync-images: ## Sync image values from images.yaml into default-values.env
+	bash scripts/sync-images.sh
+
+.PHONY: validate-images
+validate-images: ## Validate that images.yaml and default-values.env are in sync
+	bash scripts/validate-images.sh
+
+.PHONY: sync-compose-config
+sync-compose-config: ## Sync compose lightspeed-stack config from lightspeed-core-configs
+	bash scripts/sync-compose-config.sh
+
+.PHONY: validate-compose-config
+validate-compose-config: ## Validate compose lightspeed-stack config is in sync with source
+	bash scripts/validate-compose-config.sh
 
 .PHONY: validate-yaml
 validate-yaml:
