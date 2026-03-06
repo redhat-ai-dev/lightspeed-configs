@@ -22,7 +22,7 @@ services:
       RUN_CONFIG_PATH: /app-root/run.yaml
 
   ollama:
-    image: docker.io/ollama/ollama:latest
+    image: ${OLLAMA_IMAGE}
     env_file:
       - ../env/values.env
     entrypoint:

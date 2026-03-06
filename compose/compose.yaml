@@ -15,7 +15,7 @@
 # limitations under the License.
 services:
   llama-stack:
-    image: registry.redhat.io/rhoai/odh-llama-stack-core-rhel9:v3.3
+    image: ${LLAMA_STACK_IMAGE}
     ports:
       - "8321:8321"
     env_file:
@@ -38,7 +38,7 @@ services:
       start_period: 20s
 
   lightspeed-core:
-    image: quay.io/lightspeed-core/lightspeed-stack:dev-20260226-ca21850
+    image: ${LIGHTSPEED_CORE_IMAGE}
     depends_on:
       llama-stack:
         condition: service_healthy
