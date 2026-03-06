@@ -56,6 +56,23 @@ To use a different RAG image:
 make get-rag RAG_CONTENT_IMAGE=quay.io/redhat-ai-dev/rag-content:<tag>
 ```
 
+> [!IMPORTANT]
+> The vector_store ID value changes whenever the RAG content is updated in the image. This means that you only need to do the below update once per image.
+
+With Llama Stack `0.4.3` the way Vector Stores are created has changed. This means that the RAG content you download locally by running `make get-rag` contains a generated Vector Store ID. In order for RAG to work properly you need to navigate to `rag-content/vector_db/rhdh_product_docs/<docs number>/llama-stack.yaml` and find the `vector_stores` section, it should look like:
+
+```
+vector_stores:
+  - embedding_dimension: 768
+    embedding_model: sentence-transformers//rag-content/embeddings_model
+    provider_id: rhdh-product-docs-1_8
+    vector_store_id: vs_3d47e06c-ac95-49b6-9833-d5e6dd7252dd
+```
+
+You will need the `vector_store_id` value. After copying that value you will need to update `run.yaml` and `run-no-guard.yaml`. The `vector_store_id` you copied will replace the `vector_store_id` in those files.
+
+
+
 ## Configuring Safety Guards
 
 By default (`WITH_SAFETY=true`), `make local-up` uses `llama-stack-configs/run.yaml` which has Llama Guard enabled. The compose overlay starts an Ollama container and pulls the safety model automatically.
