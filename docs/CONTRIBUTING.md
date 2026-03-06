@@ -14,7 +14,7 @@
 ## Prerequisites
 
 - [Podman](https://podman.io/docs/installation) v5.4.1+ (recommended) or [Docker](https://docs.docker.com/engine/) v28.1.0+ with Compose support
-- [yq](https://github.com/mikefarah/yq) for image and config sync/validation
+- [yq](https://github.com/mikefarah/yq) v4.52.4+ for image and config sync/validation
 
 ## Running Locally
 

@@ -39,7 +39,7 @@ jobs:
         - name: Validate YAML files
           run: make validate-yaml
 
-  validate-images:
+  validate-configs:
       runs-on: ubuntu-latest
       permissions:
         contents: read
@@ -47,18 +47,10 @@ jobs:
         - name: Checkout code
           uses: actions/checkout@v4
         - name: Install yq
-          run: sudo snap install yq
+          run: |
+            sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v4.52.4/yq_linux_amd64
+            sudo chmod +x /usr/local/bin/yq
         - name: Validate image sync
           run: bash scripts/validate-images.sh
-
-  validate-compose-config:
-      runs-on: ubuntu-latest
-      permissions:
-        contents: read
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
-        - name: Install yq
-          run: sudo snap install yq
         - name: Validate compose config sync
           run: bash scripts/validate-compose-config.sh
