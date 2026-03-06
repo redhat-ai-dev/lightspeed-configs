@@ -18,7 +18,7 @@
 
 ## Running Locally
 
-1. Copy `./env/default-values.env` to `./env/values.env` and fill in any provider-specific values (see [docs/PROVIDERS.md](./docs/PROVIDERS.md)).
+1. Copy `./env/default-values.env` to `./env/values.env` and fill in any provider-specific values (see [docs/PROVIDERS.md](./PROVIDERS.md)).
 
 2. Pull the RAG content:
 
@@ -34,10 +34,10 @@ make local-up
 
 This starts Llama Stack, Lightspeed Core, and Ollama (for Llama Guard). Compose enforces startup order: Ollama healthy -> Llama Stack healthy -> Lightspeed Core starts.
 
-To disable Ollama and safety guards:
+To disable safety guards:
 
 ```sh
-make local-up WITH_OLLAMA=false
+make local-up WITH_SAFETY=false
 ```
 
 4. Stop services:
@@ -58,9 +58,9 @@ make get-rag RAG_CONTENT_IMAGE=quay.io/redhat-ai-dev/rag-content:<tag>
 
 ## Configuring Safety Guards
 
-By default (`WITH_OLLAMA=true`), `make local-up` uses `llama-stack-configs/run.yaml` which has Llama Guard enabled. The compose overlay starts an Ollama container and pulls the safety model automatically.
+By default (`WITH_SAFETY=true`), `make local-up` uses `llama-stack-configs/run.yaml` which has Llama Guard enabled. The compose overlay starts an Ollama container and pulls the safety model automatically.
 
-To skip safety guards for development, use `WITH_OLLAMA=false` which uses `llama-stack-configs/run-no-guard.yaml` instead.
+To skip safety guards for development, use `WITH_SAFETY=false` which uses `llama-stack-configs/run-no-guard.yaml` instead.
 
 Relevant environment variables in `env/values.env`:
 
@@ -114,7 +114,7 @@ make update-question-validation QUESTION_VALIDATION_TAG=0.1.17
 | Command | Description |
 | ---- | ---- |
 | `get-rag` | Pull and unpack RAG content into `./rag-content` (replaces existing contents). Optional: `RAG_CONTENT_IMAGE=<image>`. |
-| `local-up` | Start local compose services. Default: `WITH_OLLAMA=true` (uses `run.yaml`). Set `WITH_OLLAMA=false` to use `run-no-guard.yaml`. |
+| `local-up` | Start local compose services. Default: `WITH_SAFETY=true` (uses `run.yaml`). Set `WITH_SAFETY=false` to use `run-no-guard.yaml`. |
 | `local-down` | Stop local compose services. |
 | `sync-images` | Sync image values from `images.yaml` into `env/default-values.env`. Requires `yq`. |
 | `validate-images` | Validate that `images.yaml` and `env/default-values.env` are in sync. Requires `yq`. |

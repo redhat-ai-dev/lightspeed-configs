@@ -17,14 +17,14 @@ RAG_CONTENT_IMAGE ?= $(shell grep '^RAG_CONTENT_IMAGE=' env/default-values.env |
 QUESTION_VALIDATION_TAG ?= 0.1.17
 QUESTION_VALIDATION_URL ?= https://raw.githubusercontent.com/lightspeed-core/lightspeed-providers/refs/tags/$(QUESTION_VALIDATION_TAG)/resources/external_providers/inline/safety/lightspeed_question_validity.yaml
 COMPOSE ?= podman compose
-WITH_OLLAMA ?= true
+WITH_SAFETY ?= true
 
 ENV_FILES := --env-file env/default-values.env
 ifneq ($(wildcard env/values.env),)
 ENV_FILES += --env-file env/values.env
 endif
 
-ifeq ($(WITH_OLLAMA),false)
+ifeq ($(WITH_SAFETY),false)
 LOCAL_COMPOSE_FILES := -f compose/compose.yaml
 else
 LOCAL_COMPOSE_FILES := -f compose/compose.yaml -f compose/compose.ollama.yaml
