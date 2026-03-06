@@ -141,6 +141,12 @@ registered_resources:
       embedding_dimension: 768
       provider_id: rhdh-docs
 vector_stores:
+  annotation_prompt_params:
+    enable_annotations: true
+    annotation_instruction_template: >
+      When appropriate, cite sources at the end of sentences using doc_url and doc_title format. 
+      Citing sources is not always required because citations are handled externally. 
+      Never include any citation that is in the form '<| file-id |>.
   default_provider_id: rhdh-docs
   default_embedding_model:
     provider_id: sentence-transformers
