@@ -1,0 +1,61 @@
+#
+#
+# Copyright Red Hat
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+name: Sync GitOps Manifests
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "lightspeed-core-configs/lightspeed-stack.yaml"
+      - "llama-stack-configs/config.yaml"
+
+jobs:
+  sync-gitops:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout lightspeed-configs
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Generate ConfigMap manifests
+        run: bash scripts/generate-gitops-manifests.sh
+
+      - name: Checkout ai-rolling-demo-gitops
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: redhat-ai-dev/ai-rolling-demo-gitops
+          ref: development
+          token: ${{ secrets.PAT_TOKEN }}
+          path: ai-rolling-demo-gitops
+
+      - name: Copy generated manifests
+        run: |
+          cp generated/lightspeed-stack-config.yaml ai-rolling-demo-gitops/charts/rhdh/templates/lightspeed-stack-config.yaml
+          cp generated/llama-stack-config.yaml ai-rolling-demo-gitops/charts/rhdh/templates/llama-stack-config.yaml
+
+      - name: Open PR in ai-rolling-demo-gitops
+        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+          path: ai-rolling-demo-gitops
+          base: development
+          branch: sync/lightspeed-configs
+          commit-message: "sync: update lightspeed configs from lightspeed-configs@${{ github.sha }}"
+          title: "sync: update lightspeed configs"
+          body: |
+            Automated PR from [redhat-ai-dev/lightspeed-configs@${{ github.sha }}](https://github.com/redhat-ai-dev/lightspeed-configs/commit/${{ github.sha }}).
