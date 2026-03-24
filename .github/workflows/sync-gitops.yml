@@ -22,6 +22,7 @@ on:
     paths:
       - "lightspeed-core-configs/lightspeed-stack.yaml"
       - "llama-stack-configs/config.yaml"
+  workflow_dispatch:
 
 jobs:
   sync-gitops:
@@ -29,6 +30,14 @@ jobs:
     permissions:
       contents: read
     steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3.0.0
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          repositories: ai-rolling-demo-gitops
+
       - name: Checkout lightspeed-configs
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
@@ -38,9 +47,9 @@ jobs:
       - name: Checkout ai-rolling-demo-gitops
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          repository: redhat-ai-dev/ai-rolling-demo-gitops
+          repository: ${{ github.repository_owner }}/ai-rolling-demo-gitops
           ref: development
-          token: ${{ secrets.PAT_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
           path: ai-rolling-demo-gitops
 
       - name: Copy generated manifests
@@ -51,11 +60,11 @@ jobs:
       - name: Open PR in ai-rolling-demo-gitops
         uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
         with:
-          token: ${{ secrets.PAT_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
           path: ai-rolling-demo-gitops
           base: development
           branch: sync/lightspeed-configs
           commit-message: "sync: update lightspeed configs from lightspeed-configs@${{ github.sha }}"
           title: "sync: update lightspeed configs"
           body: |
-            Automated PR from [redhat-ai-dev/lightspeed-configs@${{ github.sha }}](https://github.com/redhat-ai-dev/lightspeed-configs/commit/${{ github.sha }}).
+            Automated PR from [${{ github.repository }}@${{ github.sha }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }}).
