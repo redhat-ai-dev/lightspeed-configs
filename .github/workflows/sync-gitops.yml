@@ -64,7 +64,7 @@ jobs:
           path: ai-rolling-demo-gitops
           base: development
           branch: sync/lightspeed-configs
-          commit-message: "sync: update lightspeed configs from lightspeed-configs@${{ github.sha }}"
-          title: "sync: update lightspeed configs"
+          commit-message: "(chore): sync lightspeed - llama stack configs from lightspeed-configs@${{ github.sha }}"
+          title: "(chore): update lightspeed configs"
           body: |
             Automated PR from [${{ github.repository }}@${{ github.sha }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }}).
