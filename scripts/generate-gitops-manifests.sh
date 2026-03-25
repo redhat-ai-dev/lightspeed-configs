@@ -42,7 +42,6 @@ data:
 HEADER
   strip_license "${REPO_ROOT}/lightspeed-core-configs/lightspeed-stack.yaml" \
     | sed 's/^name:.*/name: "lightspeed-core-stack"/' \
-    | sed 's/feedback_enabled: false/feedback_enabled: true/' \
     | indent
   cat << 'MCP_SECTION'
     mcp_servers:
