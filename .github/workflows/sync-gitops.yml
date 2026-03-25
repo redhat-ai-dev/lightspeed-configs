@@ -21,6 +21,7 @@ on:
       - main
     paths:
       - "lightspeed-core-configs/lightspeed-stack.yaml"
+      - "lightspeed-core-configs/rhdh-profile.py"
       - "llama-stack-configs/config.yaml"
       - "images.yaml"
   workflow_dispatch:
@@ -60,6 +61,7 @@ jobs:
           cp generated/lightspeed-stack-config.yaml ai-rolling-demo-gitops/charts/rhdh/templates/lightspeed-stack-config.yaml
           cp generated/llama-stack-config.yaml ai-rolling-demo-gitops/charts/rhdh/templates/llama-stack-config.yaml
           cp generated/rolling-demo-sidecars-job.yaml ai-rolling-demo-gitops/charts/rhdh/templates/rolling-demo-sidecars-job.yaml
+          cp generated/rhdh-profile.py ai-rolling-demo-gitops/charts/rhdh/rhdh-profile.py
 
       - name: Export image versions
         run: |
@@ -87,7 +89,7 @@ jobs:
 
             Automated sync triggered from [${{ github.repository }}@${{ github.sha }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }}).
 
-            Syncs the configs of `lightspeed-stack-config.yaml`, `llama-stack-config.yaml`, and `rolling-demo-sidecars-job.yaml` with the following image versions:
+            Syncs the configs of `lightspeed-stack-config.yaml`, `llama-stack-config.yaml`, `rolling-demo-sidecars-job.yaml`, and `rhdh-profile.py` with the following image versions:
             - `llama-stack`: `${{ env.LLAMA_STACK_IMAGE }}`
             - `lightspeed-core`: `${{ env.LIGHTSPEED_CORE_IMAGE }}`
             - `rag-content`: `${{ env.RAG_CONTENT_IMAGE }}`

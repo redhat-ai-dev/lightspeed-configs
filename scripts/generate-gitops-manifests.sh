@@ -50,7 +50,6 @@ data:
   lightspeed-stack.yaml: |
 HEADER
   strip_license "${REPO_ROOT}/lightspeed-core-configs/lightspeed-stack.yaml" \
-    | sed 's/^name:.*/name: "lightspeed-core-stack"/' \
     | indent
   cat << 'MCP_SECTION'
     mcp_servers:
@@ -86,6 +85,9 @@ HEADER
       { print }' \
     | indent
 } > "${OUTPUT_DIR}/llama-stack-config.yaml"
+
+echo "Generating rhdh-profile.py..."
+cp "${REPO_ROOT}/lightspeed-core-configs/rhdh-profile.py" "${OUTPUT_DIR}/rhdh-profile.py"
 
 echo "Generating rolling-demo-sidecars-job.yaml with updated images..."
 SIDECARS_JOB_SRC="${GITOPS_REPO}/charts/rhdh/templates/rolling-demo-sidecars-job.yaml"
