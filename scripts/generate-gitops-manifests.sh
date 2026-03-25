@@ -18,6 +18,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OUTPUT_DIR="${REPO_ROOT}/generated"
+GITOPS_REPO="${GITOPS_REPO:-${REPO_ROOT}/../ai-rolling-demo-gitops}"
 
 mkdir -p "${OUTPUT_DIR}"
 
@@ -27,6 +28,14 @@ indent() {
 
 strip_license() {
   sed -n '/^[^#]/,$p' "$1"
+}
+
+get_image() {
+  local key="$1"
+  awk -v key="${key}" '
+    /^[^[:space:]]/ { in_section = ($0 == key":") }
+    in_section && /^[[:space:]]+image:/ { print $2; exit }
+  ' "${REPO_ROOT}/images.yaml"
 }
 
 echo "Generating lightspeed-stack ConfigMap..."
@@ -77,6 +86,23 @@ HEADER
       { print }' \
     | indent
 } > "${OUTPUT_DIR}/llama-stack-config.yaml"
+
+echo "Generating rolling-demo-sidecars-job.yaml with updated images..."
+SIDECARS_JOB_SRC="${GITOPS_REPO}/charts/rhdh/templates/rolling-demo-sidecars-job.yaml"
+if [[ ! -f "${SIDECARS_JOB_SRC}" ]]; then
+  echo "Error: ${SIDECARS_JOB_SRC} not found. Set GITOPS_REPO to your ai-rolling-demo-gitops checkout." >&2
+  exit 1
+fi
+
+LLAMA_STACK_IMAGE="$(get_image "llama-stack")"
+LIGHTSPEED_CORE_IMAGE="$(get_image "lightspeed-core")"
+RAG_CONTENT_IMAGE="$(get_image "rag-content")"
+
+sed \
+  -e "s|\"image\": \"[^\"]*/llama-stack[^\"]*\"|\"image\": \"${LLAMA_STACK_IMAGE}\"|g" \
+  -e "s|\"image\": \"[^\"]*/lightspeed-stack[^\"]*\"|\"image\": \"${LIGHTSPEED_CORE_IMAGE}\"|g" \
+  -e "s|\"image\": \"[^\"]*/rag-content[^\"]*\"|\"image\": \"${RAG_CONTENT_IMAGE}\"|g" \
+  "${SIDECARS_JOB_SRC}" > "${OUTPUT_DIR}/rolling-demo-sidecars-job.yaml"
 
 echo "Generated manifests:"
 ls -1 "${OUTPUT_DIR}"
