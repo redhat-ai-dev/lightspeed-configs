@@ -61,6 +61,18 @@ jobs:
           cp generated/llama-stack-config.yaml ai-rolling-demo-gitops/charts/rhdh/templates/llama-stack-config.yaml
           cp generated/rolling-demo-sidecars-job.yaml ai-rolling-demo-gitops/charts/rhdh/templates/rolling-demo-sidecars-job.yaml
 
+      - name: Export image versions
+        run: |
+          get_image() {
+            awk -v key="$1" '
+              /^[^[:space:]]/ { in_section = ($0 == key":") }
+              in_section && /^[[:space:]]+image:/ { print $2; exit }
+            ' images.yaml
+          }
+          echo "LLAMA_STACK_IMAGE=$(get_image llama-stack)" >> $GITHUB_ENV
+          echo "LIGHTSPEED_CORE_IMAGE=$(get_image lightspeed-core)" >> $GITHUB_ENV
+          echo "RAG_CONTENT_IMAGE=$(get_image rag-content)" >> $GITHUB_ENV
+
       - name: Open PR in ai-rolling-demo-gitops
         uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
         with:
@@ -71,4 +83,11 @@ jobs:
           commit-message: "(chore): sync lightspeed - llama stack configs from lightspeed-configs@${{ github.sha }}"
           title: "(chore): update lightspeed configs"
           body: |
-            Automated PR from [${{ github.repository }}@${{ github.sha }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }}).
+            ## PR Description
+
+            Automated sync triggered from [${{ github.repository }}@${{ github.sha }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }}).
+
+            Syncs the configs of `lightspeed-stack-config.yaml`, `llama-stack-config.yaml`, and `rolling-demo-sidecars-job.yaml` with the following image versions:
+            - `llama-stack`: `${{ env.LLAMA_STACK_IMAGE }}`
+            - `lightspeed-core`: `${{ env.LIGHTSPEED_CORE_IMAGE }}`
+            - `rag-content`: `${{ env.RAG_CONTENT_IMAGE }}`
