@@ -57,7 +57,7 @@ HEADER
         provider_id: "model-context-protocol"
         url: "http://{{ .Release.Name }}-backstage.{{ .Release.Namespace }}.svc.cluster.local:7007/api/mcp-actions/v1"
         authorization_headers:
-          Authorization: "client"
+          Authorization: "/app-root/lightspeed-stack/mcp-auth-token"
 MCP_SECTION
 } > "${OUTPUT_DIR}/lightspeed-stack-config.yaml"
 
