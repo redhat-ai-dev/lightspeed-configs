@@ -1,0 +1,61 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:base",
+    "helpers:pinGitHubActionDigests",
+    ":gitSignOff"
+  ],
+  "timezone": "America/Toronto",
+  "schedule": [
+    "* 19-23 * * 0",
+    "* 0-2 * * 1"
+  ],
+  "enabledManagers": [
+    "github-actions",
+    "custom.regex",
+    "pep621",
+    "npm"
+  ],
+  "regexManagers": [],
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    },
+    {
+      "matchManagers": ["pep621"],
+      "matchPackageNames": ["python"],
+      "matchUpdateTypes": ["major", "minor"],
+      "enabled": false
+    },
+    {
+      "matchDepNames": ["quay.io/redhat-ai-dev/rag-content"],
+      "extractVersion": "^release-(?<version>\\d+\\.\\d+)-l(c|l)s",
+      "versioning": "loose"
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "groupName": "github actions",
+      "groupSlug": "github-actions",
+      "commitMessageTopic": "{{depName}}"
+    },
+    {
+      "matchManagers": ["pep621"],
+      "groupName": "python deps",
+      "groupSlug": "python-deps",
+      "commitMessageTopic": "{{depName}}"
+    },
+    {
+      "matchManagers": ["npm"],
+      "groupName": "npm deps",
+      "groupSlug": "npm-deps",
+      "commitMessageTopic": "{{depName}}"
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "enabled": true
+  },
+  "prHourlyLimit": 20,
+  "prConcurrentLimit": 10,
+  "labels": ["renovatebot"]
+}
