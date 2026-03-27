@@ -1,0 +1,131 @@
+#
+#
+# Copyright Red Hat
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+name: Check RHDH AI Development Synced Status
+
+on:
+  schedule:
+    - cron: "0 9 * * *"
+  workflow_dispatch:
+
+jobs:
+  check-rhdhai-dev-sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3.0.0
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          repositories: ai-rolling-demo-gitops
+
+      - name: Checkout lightspeed-configs
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Checkout ai-rolling-demo-gitops
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: ${{ github.repository_owner }}/ai-rolling-demo-gitops
+          ref: development
+          token: ${{ steps.app-token.outputs.token }}
+          path: ai-rolling-demo-gitops
+
+      - name: Generate ConfigMap manifests
+        run: bash scripts/generate-gitops-manifests.sh
+        env:
+          GITOPS_REPO: ${{ github.workspace }}/ai-rolling-demo-gitops
+
+      - name: Compare generated manifests with development branch
+        id: compare
+        run: |
+          diff_found=false
+
+          declare -A file_map=(
+            ["generated/lightspeed-stack-config.yaml"]="ai-rolling-demo-gitops/charts/rhdh/templates/lightspeed-stack-config.yaml"
+            ["generated/llama-stack-config.yaml"]="ai-rolling-demo-gitops/charts/rhdh/templates/llama-stack-config.yaml"
+            ["generated/rolling-demo-sidecars-job.yaml"]="ai-rolling-demo-gitops/charts/rhdh/templates/rolling-demo-sidecars-job.yaml"
+            ["generated/rhdh-profile.py"]="ai-rolling-demo-gitops/charts/rhdh/rhdh-profile.py"
+          )
+
+          for src in "${!file_map[@]}"; do
+            dest="${file_map[$src]}"
+            if ! diff -q "$src" "$dest" > /dev/null 2>&1; then
+              echo "Difference detected: $(basename "$src")"
+              diff_found=true
+            fi
+          done
+
+          echo "diff_found=$diff_found" >> $GITHUB_OUTPUT
+
+      - name: Check for recent open sync-gitops PR
+        id: check-pr
+        if: steps.compare.outputs.diff_found == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          one_week_ago=$(date -u -d '7 days ago' +%Y-%m-%dT%H:%M:%SZ)
+
+          pr_json=$(gh pr list \
+            --repo "${{ github.repository_owner }}/ai-rolling-demo-gitops" \
+            --head "sync/lightspeed-configs" \
+            --state open \
+            --json number,createdAt \
+            --limit 1)
+
+          recent_pr="false"
+          if [ "$(echo "$pr_json" | jq 'length')" -gt 0 ]; then
+            pr_created=$(echo "$pr_json" | jq -r '.[0].createdAt')
+            pr_number=$(echo "$pr_json" | jq -r '.[0].number')
+            if [[ "$pr_created" > "$one_week_ago" ]]; then
+              recent_pr="true"
+              echo "Skipping alert: open sync PR #$pr_number created at $pr_created is within the last week"
+            fi
+          fi
+
+          echo "recent_pr=$recent_pr" >> $GITHUB_OUTPUT
+
+      - name: Send Slack Sync alert
+        if: steps.compare.outputs.diff_found == 'true' && steps.check-pr.outputs.recent_pr != 'true'
+        run: |
+          curl -s -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
+            -H "Content-Type: application/json" \
+            --data-binary '{
+              "text": "*<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|[FIRING] RHDHAIDevelopmentOutOfSync>*",
+              "attachments": [
+                {
+                  "color": "#FFD700",
+                  "fields": [
+                    {
+                      "title": "Summary",
+                      "value": "`ai-rolling-demo-gitops` (`development` branch) is out of sync with lightspeed configs and No recent open PR was found.",
+                      "short": false
+                    },
+                    {
+                      "title": "Description",
+                      "value": "The configuration of llama-stack and lightspeed-core from `lightspeed-configs` differ from the committed manifests in the `development` branch of `ai-rolling-demo-gitops`."
+                      "short": false
+                    },
+                    {
+                      "title": "Severity",
+                      "value": "warning",
+                      "short": true
+                    }
+                  ]
+                }
+              ]
+            }'
