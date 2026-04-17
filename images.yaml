@@ -15,7 +15,7 @@
 # limitations under the License.
 lightspeed-core:
   llama_version: 0.5.2
-  image: quay.io/lightspeed-core/lightspeed-stack:0.5.0
+  image: quay.io/lightspeed-core/lightspeed-stack:0.5.1
 rag-content:
   llama_version: 0.5.0
   image: quay.io/redhat-ai-dev/rag-content:release-1.9-lls-0.5.0-642c567fe10a62b5ff711654306b72912f341e05
