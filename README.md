@@ -9,7 +9,7 @@
 See [images.yaml](./images.yaml) for current sprint images and versions.
 
 `main` tracks one active release at a time. Historical releases are preserved in `rhdh-x.x` branches and Git tags.
-`latest_release` field maps to the latest LCORE release in `registry.redhat.io` for use in the RHDH midstream as `dev` tags will break.
+`latest_release` field maps to the latest LCORE release tag for [lightspeed-core/lightspeed-stack-rhel9](https://catalog.redhat.com/en/software/containers/lightspeed-core/lightspeed-stack-rhel9/69149c6590bc83e678940a63).
 
 ## Architecture
 
