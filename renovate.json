@@ -10,6 +10,7 @@
     "* 19-23 * * 0",
     "* 0-2 * * 1"
   ],
+  "baseBranchPatterns": ["/^main$/", "/^release-\\d+\\.\\d+$/"],
   "enabledManagers": [
     "github-actions",
     "custom.regex",
@@ -26,6 +27,17 @@
       "matchManagers": ["pep621"],
       "matchPackageNames": ["python"],
       "matchUpdateTypes": ["major", "minor"],
+      "enabled": false
+    },
+    {
+      "matchManagers": ["custom.regex"],
+      "matchUpdateTypes": ["major", "minor"],
+      "matchBaseBranches": ["/^release-\\d+\\.\\d+$/"],
+      "enabled": false
+    },
+    {
+      "matchManagers": ["github-actions","pep621","npm"],
+      "matchBaseBranches": ["/^release-\\d+\\.\\d+$/"],
       "enabled": false
     },
     {
