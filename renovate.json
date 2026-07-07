@@ -1,7 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base",
+    "config:recommended",
     "helpers:pinGitHubActionDigests",
     ":gitSignOff"
   ],
@@ -17,7 +17,19 @@
     "pep621",
     "npm"
   ],
-  "regexManagers": [],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/images.*y[a]?ml$/"
+      ],
+      "matchStrings": [
+        "image: (?<depName>\\S*):(?<currentValue>\\S*)"
+      ],
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "{{{depName}}}"
+    }
+  ],
   "packageRules": [
     {
       "matchUpdateTypes": ["major"],
@@ -39,6 +51,18 @@
       "matchManagers": ["github-actions","pep621","npm"],
       "matchBaseBranches": ["/^release-\\d+\\.\\d+$/"],
       "enabled": false
+    },
+    {
+      "matchDepNames": ["quay.io/lightspeed-core/lightspeed-stack"],
+      "enabled": false
+    },
+    {
+      "matchDepNames": ["quay.io/lightspeed-core/lightspeed-stack"],
+      "matchBaseBranches": ["/^release-\\d+\\.\\d+$/"],
+      "matchUpdateTypes": ["patch"],
+      "extractVersion": "^(?<version>\\d+\\.\\d+\\.\\d+)",
+      "versioning": "loose",
+      "enabled": true
     },
     {
       "matchDepNames": ["quay.io/redhat-ai-dev/rag-content"],
