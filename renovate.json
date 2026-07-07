@@ -14,7 +14,6 @@
   "enabledManagers": [
     "github-actions",
     "custom.regex",
-    "pep621",
     "npm"
   ],
   "customManagers": [
@@ -36,19 +35,13 @@
       "enabled": false
     },
     {
-      "matchManagers": ["pep621"],
-      "matchPackageNames": ["python"],
-      "matchUpdateTypes": ["major", "minor"],
-      "enabled": false
-    },
-    {
       "matchManagers": ["custom.regex"],
       "matchUpdateTypes": ["major", "minor"],
       "matchBaseBranches": ["/^release-\\d+\\.\\d+$/"],
       "enabled": false
     },
     {
-      "matchManagers": ["github-actions","pep621","npm"],
+      "matchManagers": ["github-actions","npm"],
       "matchBaseBranches": ["/^release-\\d+\\.\\d+$/"],
       "enabled": false
     },
@@ -73,12 +66,6 @@
       "matchManagers": ["github-actions"],
       "groupName": "github actions",
       "groupSlug": "github-actions",
-      "commitMessageTopic": "{{depName}}"
-    },
-    {
-      "matchManagers": ["pep621"],
-      "groupName": "python deps",
-      "groupSlug": "python-deps",
       "commitMessageTopic": "{{depName}}"
     },
     {
