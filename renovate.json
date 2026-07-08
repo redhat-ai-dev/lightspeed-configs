@@ -53,9 +53,13 @@
       "matchDepNames": ["quay.io/lightspeed-core/lightspeed-stack"],
       "matchBaseBranches": ["/^release-\\d+\\.\\d+$/"],
       "matchUpdateTypes": ["patch"],
-      "extractVersion": "^(?<version>\\d+\\.\\d+\\.\\d+)",
-      "versioning": "loose",
       "enabled": true
+    },
+    {
+      "matchDepNames": ["quay.io/lightspeed-core/lightspeed-stack"],
+      "matchBaseBranches": ["/^release-\\d+\\.\\d+$/"],
+      "extractVersion": "^(?<version>\\d+\\.\\d+\\.\\d+)",
+      "versioning": "loose"
     },
     {
       "matchDepNames": ["quay.io/redhat-ai-dev/rag-content"],
