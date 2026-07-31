@@ -50,7 +50,7 @@ notebooks_vector_store_faiss_to_pgvector() {
       print "      embedding_dimension: 768"
       print "      config:"
       print "        host: ${env.PGVECTOR_HOST:=lightspeed-postgres-svc.lightspeed-postgres.svc.cluster.local}"
-      print "        port: ${env.PGVECTOR_PORT:=5432}"
+      print "        port: \"${env.PGVECTOR_PORT:=5432}\""
       print "        db: ${env.PGVECTOR_DB}"
       print "        user: ${env.PGVECTOR_USER}"
       print "        password: ${env.PGVECTOR_PASSWORD}"
