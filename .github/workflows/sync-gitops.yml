@@ -22,6 +22,7 @@ on:
     paths:
       - "lightspeed-core-configs/rhdh-profile.py"
       - "lightspeed-core-configs/lightspeed-stack.yaml"
+      - "lightspeed-core-configs/byok-rag.yaml"
       - "llama-stack-configs/config.yaml"
       - "images.yaml"
   workflow_dispatch:

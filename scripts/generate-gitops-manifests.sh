@@ -127,6 +127,14 @@ HEADER
     | indent
 } > "${OUTPUT_DIR}/lightspeed-stack-config.yaml"
 
+echo "Injecting BYOK RAG config..."
+LSTACK_OUT="${OUTPUT_DIR}/lightspeed-stack-config.yaml"
+BYOK_SNIPPET="${REPO_ROOT}/lightspeed-core-configs/byok-rag.yaml"
+# Insert custom-org-docs entry after the last byok_rag item, and add to rag.tool list
+sed -i "/db_path: \/rag-content\/vector_db\/rhdh_product_docs/r /dev/stdin" \
+  "${LSTACK_OUT}" < <(indent < "${BYOK_SNIPPET}")
+sed -i "s/        - rhdh-docs$/        - rhdh-docs\n        - custom-org-docs/" "${LSTACK_OUT}"
+
 echo "Generating rhdh-profile.py..."
 cp "${REPO_ROOT}/lightspeed-core-configs/rhdh-profile.py" "${OUTPUT_DIR}/rhdh-profile.py"
 
