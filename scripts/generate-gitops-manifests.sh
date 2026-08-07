@@ -129,10 +129,15 @@ HEADER
 
 echo "Injecting BYOK RAG config..."
 LSTACK_OUT="${OUTPUT_DIR}/lightspeed-stack-config.yaml"
-BYOK_SNIPPET="${REPO_ROOT}/lightspeed-core-configs/byok-rag.yaml"
 # Insert custom-org-docs entry after the last byok_rag item, and add to rag.tool list
-sed -i "/db_path: \/rag-content\/vector_db\/rhdh_product_docs/r /dev/stdin" \
-  "${LSTACK_OUT}" < <(indent < "${BYOK_SNIPPET}")
+sed -i "/db_path: \/rag-content\/vector_db\/rhdh_product_docs/a\\
+      - rag_id: custom-org-docs\\
+        rag_type: inline::faiss\\
+        embedding_model: sentence-transformers//rag-content/embeddings_model\\
+        embedding_dimension: 768\\
+        vector_db_id: vs_727b6321-1ff4-47bf-a76b-1cc12426c954\\
+        db_path: /rag-content/vector_db/custom_docs/faiss_store.db\\
+        score_multiplier: 1.0" "${LSTACK_OUT}"
 sed -i "s/        - rhdh-docs$/        - rhdh-docs\n        - custom-org-docs/" "${LSTACK_OUT}"
 
 echo "Generating rhdh-profile.py..."
