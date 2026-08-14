@@ -23,6 +23,7 @@ services:
       - ../lightspeed-core-configs/rhdh-profile.py:/app-root/rhdh-profile.py:Z
       - ../llama-stack-configs/config.yaml:/app-root/config.yaml:Z
       - ../rag-content:/rag-content:Z
+      - ../skills:/app-root/skills:Z,ro
       # Only used when the vertexai provider is configured. Falls back to a
       # harmless empty placeholder so the mount doesn't fail otherwise.
       - ${GOOGLE_APPLICATION_CREDENTIALS_HOST_PATH:-../env/gcp-credentials-placeholder.json}:/app-root/gcp-credentials.json:Z,ro

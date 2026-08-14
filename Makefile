@@ -43,6 +43,10 @@ get-rag: ## Download a copy of the RAG embedding model and vector database
 	$(CONTAINER_ENGINE) cp tmp-rag-container:/rag/embeddings_model rag-content
 	$(CONTAINER_ENGINE) rm tmp-rag-container
 
+.PHONY: get-skills
+get-skills: ## Fetch RHDH skills from GitHub into the skills/ directory
+	bash scripts/fetch-skills.sh
+
 .PHONY: local-up
 local-up:
 	$(COMPOSE) $(ENV_FILES) $(LOCAL_COMPOSE_FILES) up -d

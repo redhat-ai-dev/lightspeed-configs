@@ -4,7 +4,9 @@
 embeddings_model
 vector_db
 
-rag-content 
+rag-content
+skills
+
 values.env
 *.local.yaml
 
