@@ -147,6 +147,6 @@ rag:
   tool:
     - okp
 okp:
-  rhokp_url: "${env.OKP_SERVICE_URL:=http://localhost:8080}"
+  rhokp_url: '${env.OKP_SERVICE_URL:=http://localhost:8080}'
   offline: true
-  chunk_filter_query: "product:*developer_hub*"
+  chunk_filter_query: 'product:*developer_hub*'
