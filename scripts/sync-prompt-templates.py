@@ -106,7 +106,7 @@ def build_updated_text(source_text: str, target_text: str) -> str:
     )
     updated_text = replace_section(
         updated_text,
-        r"^(?P<indent>\s*)invalid_question_response: \|-\n.*?(?=^mcp_servers:)",
+        r"^(?P<indent>\s*)invalid_question_response: \|-\n.*?(?=^skills:|^mcp_servers:)",
         "invalid_question_response",
         invalid_response,
     )
