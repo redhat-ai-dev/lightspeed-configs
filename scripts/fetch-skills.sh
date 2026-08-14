@@ -23,6 +23,8 @@ SKILLS_DIR="$REPO_ROOT/skills"
 RHDH_SKILLS_REPO="${RHDH_SKILLS_REPO:-https://github.com/redhat-developer/rhdh-skills.git}"
 RHDH_SKILLS_REF="${RHDH_SKILLS_REF:-main}"
 
+mkdir -p "$SKILLS_DIR"
+
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 

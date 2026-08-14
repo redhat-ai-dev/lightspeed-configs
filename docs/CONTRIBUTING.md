@@ -3,6 +3,7 @@
 - [Prerequisites](#prerequisites)
 - [Running Locally](#running-locally)
 - [Configuring RAG Content](#configuring-rag-content)
+- [Configuring Skills](#configuring-skills)
 - [Configuring Validation](#configuring-validation)
 - [Syncing Configs](#syncing-configs)
   - [Syncing Images](#syncing-images)
@@ -30,7 +31,13 @@
 make get-rag
 ```
 
-3. The production config (`lightspeed-stack.yaml`) sets `host: 127.0.0.1` so the service only binds to loopback — reachable exclusively by containers in the same Pod on Kubernetes. The compose file overrides this with `SERVICE_HOST=0.0.0.0` so the container port mapping works and you can reach the API at `localhost:8080` from your host.
+3. Optional: pull RHDH skills for skills consumption:
+
+```sh
+make get-skills
+```
+
+4. The production config (`lightspeed-stack.yaml`) sets `host: 127.0.0.1` so the service only binds to loopback — reachable exclusively by containers in the same Pod on Kubernetes. The compose file overrides this with `SERVICE_HOST=0.0.0.0` so the container port mapping works and you can reach the API at `localhost:8080` from your host.
 
 1. Start the local API stack:
 
@@ -101,6 +108,22 @@ Paste that value into `byok_rag[].vector_db_id`. Keep `embedding_model` as the d
 `notebooks` is separate: it is dynamic create capacity under `vector_store` (local FAISS; GitOps rewrites it to pgvector). It is not a second `byok_rag` corpus.
 
 If you use a gitignored `lightspeed-stack.local.yaml` for local providers, copy the same `byok_rag` / `rag` / `vector_store` / `shields` sections from the committed file when they change.
+
+## Configuring Skills
+
+`make get-skills` is optional and only needed for skills consumption. It pulls skills from the [rhdh-skills](https://github.com/redhat-developer/rhdh-skills) repository into `./skills`, which `make local-up` mounts read-only to `/app-root/skills` (configured under `skills.paths` in [`lightspeed-stack.yaml`](../lightspeed-core-configs/lightspeed-stack.yaml)). It fully replaces the directory contents on each run.
+
+To use a different skills repo/ref:
+
+```sh
+make get-skills RHDH_SKILLS_REPO=<git-url> RHDH_SKILLS_REF=<branch-or-tag>
+```
+
+Restart local services after fetching skills for them to take effect:
+
+```sh
+make local-down && make local-up
+```
 
 ## Configuring Validation
 
@@ -179,6 +202,7 @@ make validate-yaml
 | Command | Description |
 | ---- | ---- |
 | `get-rag` | Pull and unpack RAG content into `./rag-content` (replaces existing contents). Optional: `RAG_CONTENT_IMAGE=<image>`. |
+| `get-skills` | Optional. Fetch RHDH skills into `./skills` for skills consumption (replaces existing contents). Optional: `RHDH_SKILLS_REPO=<url>`, `RHDH_SKILLS_REF=<ref>`. |
 | `local-up` | Start local compose services. Validation is controlled entirely through env vars in `env/values.env`. |
 | `local-down` | Stop local compose services. |
 | `sync-images` | Sync image values from `images.yaml` into `env/default-values.env`. Requires `yq`. |
