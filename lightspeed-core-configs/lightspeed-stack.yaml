@@ -27,7 +27,7 @@ llama_stack:
     profile: /app-root/config.yaml
     native_override:
       vector_stores:
-        annotation_prompt_params: # TODO: remove this once RAG is removed
+        annotation_prompt_params:
           enable_annotations: true
           annotation_instruction_template: >
             When appropriate, cite sources at the end of sentences using doc_url and doc_title format.
@@ -53,25 +53,15 @@ inference:
     #   extra:
     #     project: ${env.VERTEX_AI_PROJECT:=}
     #     location: ${env.VERTEX_AI_LOCATION:=global}
-byok_rag:
-  - rag_id: rhdh-docs
-    rag_type: inline::faiss
-    embedding_model: sentence-transformers//rag-content/embeddings_model
-    embedding_dimension: 768
-    vector_db_id: vs_757285d9-b657-4bed-b18c-3359844e8c0d
-    db_path: /rag-content/vector_db/rhdh_product_docs/1.10/faiss_store.db
-rag:
-  tool:
-    - rhdh-docs
 vector_store:
   default_provider: notebooks
   providers:
     - id: notebooks
       type: faiss
-      embedding_model: /rag-content/embeddings_model
+      embedding_model: nomic-ai/nomic-embed-text-v1.5
       embedding_dimension: 768
       config:
-        path: /rag-content/vector_db/notebooks/faiss_store.db
+        path: /tmp/vector_db/notebooks/faiss_store.db
 user_data_collection:
   feedback_enabled: true
   feedback_storage: '/tmp/data/feedback'
@@ -153,3 +143,10 @@ mcp_servers:
     url: 'http://localhost:7007/api/mcp-actions/v1'
     authorization_headers:
       Authorization: 'client'
+rag:
+  tool:
+    - okp
+okp:
+  rhokp_url: "${env.OKP_SERVICE_URL:=http://localhost:8080}"
+  offline: true
+  chunk_filter_query: "product:*developer_hub*"
