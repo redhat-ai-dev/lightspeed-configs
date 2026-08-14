@@ -36,6 +36,9 @@ jobs:
       - name: Fetch RAG content
         run: make get-rag CONTAINER_ENGINE=docker
 
+      - name: Strip OKP config for smoke test
+        run: yq -i 'del(.rag) | del(.okp)' lightspeed-core-configs/lightspeed-stack.yaml
+
       - name: Start services
         run: docker compose --env-file env/default-values.env -f compose/compose.yaml up -d --wait --wait-timeout 120
 
