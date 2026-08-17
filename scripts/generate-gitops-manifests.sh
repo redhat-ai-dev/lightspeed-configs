@@ -50,7 +50,7 @@ notebooks_vector_store_faiss_to_pgvector() {
       skip = 1
       print "    - id: notebooks"
       print "      type: pgvector"
-      print "      embedding_model: /rag-content/embeddings_model"
+      print "      embedding_model: nomic-ai/nomic-embed-text-v1.5"
       print "      embedding_dimension: 768"
       print "      config:"
       print "        host: ${env.PGVECTOR_HOST:=lightspeed-postgres-svc.lightspeed-postgres.svc.cluster.local}"
