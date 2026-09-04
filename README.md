@@ -1,5 +1,10 @@
 # Intelligent Assistant Configurations
 
+> [!WARNING]
+> The main branch has been retired and will no longer receive latest active development. For 2.x development, it has been moved to [redhat-developer/rhdh-intelligent-assistant-configs](https://github.com/redhat-developer/rhdh-intelligent-assistant-configs).
+>
+> For active 1.10.x patch changes, visit the [release-1.10 branch](https://github.com/redhat-ai-dev/lightspeed-configs/tree/release-1.10).
+
 [![Apache2.0 License](https://img.shields.io/badge/License-Apache2.0-brightgreen.svg)](LICENSE)
 [![Target LCORE Version](https://img.shields.io/badge/Target%20LCORE-0.7.0-blue)]()
 [![RHDH Release](https://img.shields.io/badge/RHDH%20Release-2.1.0-blueviolet)]()
