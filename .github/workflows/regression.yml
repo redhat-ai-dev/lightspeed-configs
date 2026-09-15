@@ -1,0 +1,151 @@
+#
+#
+# Copyright Red Hat
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+name: Lightspeed regression tests
+
+on:
+  issue_comment:
+    types:
+      - created
+
+jobs:
+  authorize:
+    if: >-
+      github.event.issue.pull_request &&
+      github.event.comment.body == '/run-regression'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      authorized: ${{ steps.authorize.outputs.authorized }}
+      configs_sha: ${{ steps.authorize.outputs.configs_sha }}
+
+    steps:
+      - name: Authorize regression request
+        id: authorize
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+          COMMENT_AUTHOR: ${{ github.event.comment.user.login }}
+        run: |
+          authorize() {
+            {
+              printf 'authorized=true\n'
+              printf 'configs_sha=%s\n' "$1"
+            } >> "$GITHUB_OUTPUT"
+          }
+
+          deny() {
+            printf 'Regression request denied: %s\n' "$1"
+            printf 'authorized=false\n' >> "$GITHUB_OUTPUT"
+            exit 0
+          }
+
+          pr_path="repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}"
+          state="$(gh api "$pr_path" --jq '.state')"
+          base_ref="$(gh api "$pr_path" --jq '.base.ref')"
+          head_repo="$(gh api "$pr_path" --jq '.head.repo.full_name')"
+          head_sha="$(gh api "$pr_path" --jq '.head.sha')"
+          permission="$(gh api "repos/${GITHUB_REPOSITORY}/collaborators/${COMMENT_AUTHOR}/permission" --jq '.permission')"
+
+          [[ "$state" == "open" ]] || deny "pull request is not open"
+          [[ "$base_ref" == "release-1.10" ]] || deny "pull request does not target release-1.10"
+          [[ "$head_repo" == "$GITHUB_REPOSITORY" ]] || deny "pull request is from a fork"
+
+          case "$permission" in
+            admin|maintain|write)
+              authorize "$head_sha"
+              ;;
+            *)
+              deny "commenter does not have write permission"
+              ;;
+          esac
+
+  regression:
+    needs: authorize
+    if: needs.authorize.outputs.authorized == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    # Keep regression credentials only in this protected environment. Do not
+    # duplicate them as repository or organization secrets.
+    environment: lightspeed-regression
+    permissions:
+      contents: read
+    env:
+      TEST_MCP_SERVER_IMAGE: quay.io/redhat-ai-dev/test-mcp-server@sha256:4bf2e00b3cef61e6d7697f63202616bb8bbc4c6e5f9608ddea6ffe6a42a63599
+      VALIDATION_MODEL_NAME: meta-llama-31-8b-quantizedw4a16
+
+    steps:
+      - name: Check out lightspeed-configs
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ needs.authorize.outputs.configs_sha }}
+          path: lightspeed-configs
+          persist-credentials: false
+
+      - name: Check out regression suite
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          repository: Jdubrick/lightspeed-regression-testing
+          ref: 07a8f4c7da730dba937a7a87e94e261db1ac4753 # release-1.10
+          path: lightspeed-regression-testing
+          persist-credentials: false
+
+      - name: Set up uv and Python
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          version: '0.8.4'
+          python-version: '3.12'
+          enable-cache: true
+          cache-dependency-glob: lightspeed-regression-testing/uv.lock
+
+      - name: Validate protected configuration
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          VLLM_API_KEY: ${{ secrets.VLLM_API_KEY }}
+          VLLM_URL: ${{ secrets.VLLM_URL }}
+        run: |
+          missing=()
+          for name in OPENAI_API_KEY VLLM_API_KEY VLLM_URL; do
+            if [[ -z "${!name:-}" ]]; then
+              missing+=("$name")
+            fi
+          done
+          if (( ${#missing[@]} > 0 )); then
+            printf 'Missing required GitHub Actions secrets: %s\n' "${missing[*]}" >&2
+            exit 1
+          fi
+
+      - name: Prepare RAG content
+        working-directory: lightspeed-configs
+        run: make get-rag CONTAINER_ENGINE=docker
+
+      - name: Run regression suite
+        working-directory: lightspeed-configs
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          VLLM_API_KEY: ${{ secrets.VLLM_API_KEY }}
+          VLLM_URL: ${{ secrets.VLLM_URL }}
+        run: bash ../lightspeed-regression-testing/scripts/run-regression.sh -v
+
+      - name: Upload regression results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: lightspeed-regression-results
+          path: lightspeed-regression-testing/results/
+          if-no-files-found: warn
+          retention-days: 7
